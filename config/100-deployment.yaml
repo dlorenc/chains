@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: signing-secrets
+  namespace: tekton-pipelines
+  labels:
+    pipeline.tekton.dev/release: devel
+    # Populated after installation
+---
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: tekton-watcher-controller
+      namespace: tekton-pipelines
+      labels:
+        app.kubernetes.io/name: tekton-pipelines
+        app.kubernetes.io/component: watcher
+        pipeline.tekton.dev/release: "devel"
+        version: "devel"
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app: tekton-watcher-controller
+      template:
+        metadata:
+          annotations:
+            cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+          labels:
+            app: tekton-watcher-controller
+            app.kubernetes.io/name: tekton-pipelines
+            app.kubernetes.io/component: controller
+            # tekton.dev/release value replaced with inputs.params.versionTag in pipeline/tekton/publish.yaml
+            pipeline.tekton.dev/release: "devel"
+            version: "devel"
+        spec:
+          serviceAccountName: tekton-pipelines-controller
+          containers:
+          - name: tekton-watcher-controller
+            image: ko://github.com/dlorenc/chains/cmd
+            volumeMounts:
+              - name: config-logging
+                mountPath: /etc/config-logging
+              - name: config-signing
+                mountPath: /etc/config-signing
+            env:
+            - name: SYSTEM_NAMESPACE
+              valueFrom:
+                 fieldRef:
+                   fieldPath: metadata.namespace
+            - name: METRICS_DOMAIN
+              value: tekton.dev/pipeline
+          volumes:
+            - name: config-logging
+              configMap:
+                name: config-logging
+            - name: config-signing
+              secret:
+                secretName: signing-secrets
+    
