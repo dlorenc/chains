@@ -32,8 +32,18 @@ And set that as the key `private` in the `Secret` `signing-secrets`:
 kubectl edit secret signing-secrets -n tekton-pipelines
 ```
 
-Do the same for your passphrase (remembering to base64 encode it), setting that as the key
-`passphrase`.
+Do the same for your passphrase, remembering to remove any unnecessary
+whitespace and base64 encode it:
+
+```shell
+echo -n 'mypassword' | base64
+```
+
+And set that as the key `passphrase` in the `Secret` `signing-secrets`:
+
+```shell
+kubectl edit secret signing-secrets -n tekton-pipelines
+```
 
 ## Verification
 
