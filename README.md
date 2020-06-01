@@ -44,7 +44,7 @@ They are stored in annotations on the `TaskRun`.
 
 ```shell
 kubectl get taskrun $taskrun -o=json | jq -r .metadata.annotations.body | base64 -D > body
-kubectl get taskrun $taskrun -o=json | jq -r .metadata.annotations.signature > signature
+kubectl get taskrun $taskrun -o=json | jq -r .metadata.annotations.signed > signature
 ```
 
 Then verify them again with gpg:
