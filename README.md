@@ -53,7 +53,7 @@ you can retrieve the signature and payload using kubectl to verify them.
 They are stored in annotations on the `TaskRun`.
 
 ```shell
-kubectl get taskrun $taskrun -o=json | jq -r .metadata.annotations.body | base64 -D > body
+kubectl get taskrun $taskrun -o=json | jq -r .metadata.annotations.body | base64 --decode > body
 kubectl get taskrun $taskrun -o=json | jq -r .metadata.annotations.signed > signature
 ```
 
