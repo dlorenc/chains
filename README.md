@@ -32,8 +32,18 @@ And set that as the key `private` in the `Secret` `signing-secrets`:
 kubectl edit secret signing-secrets -n tekton-pipelines
 ```
 
-Do the same for your passphrase (remembering to base64 encode it), setting that as the key
-`passphrase`.
+Do the same for your passphrase, remembering to remove any unnecessary
+whitespace and base64 encode it:
+
+```shell
+echo -n 'mypassword' | base64
+```
+
+And set that as the key `passphrase` in the `Secret` `signing-secrets`:
+
+```shell
+kubectl edit secret signing-secrets -n tekton-pipelines
+```
 
 ## Verification
 
@@ -43,8 +53,8 @@ you can retrieve the signature and payload using kubectl to verify them.
 They are stored in annotations on the `TaskRun`.
 
 ```shell
-kubectl get taskrun $taskrun -o=json | jq -r .metadata.annotations.body | base64 -D > body
-kubectl get taskrun $taskrun -o=json | jq -r .metadata.annotations.signature > signature
+kubectl get taskrun $taskrun -o=json | jq -r .metadata.annotations.body | base64 --decode > body
+kubectl get taskrun $taskrun -o=json | jq -r .metadata.annotations.signed > signature
 ```
 
 Then verify them again with gpg:
