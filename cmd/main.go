@@ -143,6 +143,11 @@ func (r *rec) Reconcile(ctx context.Context, key string) error {
 							if err := sign.AttachSignature(or, r.signer, tr, r.logger); err != nil {
 								r.logger.Warnf("Error attaching signature: %s", err)
 							}
+						case "storage":
+							r.logger.Infof("Found storage resource to sign %s", or.Name)
+							if err := sign.SignStorage(ctx, or, r.signer, tr, r.logger); err != nil {
+								r.logger.Warnf("Error attaching signature: %s", err)
+							}
 						default:
 							r.logger.Infof("Can't sign resource %s of type %s", or.Name, or.Type)
 						}

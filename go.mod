@@ -3,9 +3,12 @@ module github.com/dlorenc/chains
 go 1.14
 
 require (
+	cloud.google.com/go/storage v1.0.0
+	github.com/Azure/go-autorest v14.1.1+incompatible // indirect
 	github.com/google/go-containerregistry v0.0.0-20200115214256-379933c9c22b
 	github.com/tektoncd/pipeline v0.12.0
 	go.uber.org/zap v1.15.0
+	gocloud.dev v0.19.0
 	golang.org/x/crypto v0.0.0-20200206161412-a0c6ece9d31a
 	google.golang.org/grpc v1.29.1 // indirect
 	google.golang.org/protobuf v1.21.0 // indirect

@@ -3,6 +3,7 @@ package sign
 import (
 	"bytes"
 	"encoding/json"
+	"io"
 	"io/ioutil"
 	"os"
 
@@ -49,9 +50,14 @@ func (s *Signer) Sign(i interface{}) ([]byte, []byte, error) {
 	if err != nil {
 		return nil, nil, err
 	}
+	signature, err := s.SignReader(bytes.NewReader(b))
+	return signature, b, err
+}
+
+func (s *Signer) SignReader(r io.Reader) ([]byte, error) {
 	signature := bytes.Buffer{}
-	if err := openpgp.ArmoredDetachSignText(&signature, s.key, bytes.NewReader(b), nil); err != nil {
-		return nil, nil, err
+	if err := openpgp.ArmoredDetachSignText(&signature, s.key, r, nil); err != nil {
+		return nil, err
 	}
-	return signature.Bytes(), b, nil
+	return signature.Bytes(), nil
 }
