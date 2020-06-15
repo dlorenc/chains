@@ -13,7 +13,7 @@ To get started, you first have to generate a GPG keypair to be used by your Tekt
 There are many ways to go about this, but you can usually use something like this:
 
 ```shell
-gpg gen-key
+gpg --gen-key
 ```
 
 Enter a passprase (make sure you remember it!) and a name for the key.
@@ -50,11 +50,21 @@ kubectl edit secret signing-secrets -n tekton-pipelines
 Assuming you have the keys loaded into GPG on your system (you should if you created them earlier),
 you can retrieve the signature and payload using kubectl to verify them.
 
+Run some task in Tekton that will create a `TaskRun` object. An example
+might be the clustertask-pipelinerun example from the pipelines project:
+
+```shell
+kubectl apply -f examples/v1beta1/pipelineruns/clustertask-pipelinerun.yaml
+```
+
+Then the body and signature of that run will be attached to the object's
+annotations.
+
 They are stored in annotations on the `TaskRun`.
 
 ```shell
-kubectl get taskrun $taskrun -o=json | jq -r .metadata.annotations.body | base64 --decode > body
-kubectl get taskrun $taskrun -o=json | jq -r .metadata.annotations.signed > signature
+kubectl get taskrun $taskrun -o=json | jq -r .items[0].metadata.annotations.body | base64 --decode > body
+kubectl get taskrun $taskrun -o=json | jq -r .items[0].metadata.annotations.signed > signature
 ```
 
 Then verify them again with gpg:
