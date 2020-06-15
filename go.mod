@@ -3,19 +3,36 @@ module github.com/dlorenc/chains
 go 1.14
 
 require (
-	cloud.google.com/go/storage v1.0.0
+	cloud.google.com/go/storage v1.6.0
 	github.com/Azure/go-autorest v14.1.1+incompatible // indirect
-	github.com/google/go-containerregistry v0.0.0-20200115214256-379933c9c22b
-	github.com/tektoncd/pipeline v0.12.0
+	github.com/cloudevents/sdk-go v1.1.2 // indirect
+	github.com/go-openapi/spec v0.19.4 // indirect
+	github.com/google/go-containerregistry v0.0.0-20200331213917-3d03ed9b1ca2
+	github.com/google/gofuzz v1.1.0 // indirect
+	github.com/googleapis/gnostic v0.3.1 // indirect
+	github.com/imdario/mergo v0.3.8 // indirect
+	github.com/in-toto/in-toto-golang v0.0.0-20200605124000-296506de66a4
+	github.com/json-iterator/go v1.1.8 // indirect
+	github.com/markbates/inflect v1.0.4 // indirect
+	github.com/nats-io/nats-streaming-server v0.17.0 // indirect
+	github.com/nbio/st v0.0.0-20140626010706-e9e8d9816f32 // indirect
+	github.com/prometheus/common v0.7.0 // indirect
+	github.com/shurcooL/githubv4 v0.0.0-20191102174205-af46314aec7b // indirect
+	github.com/tektoncd/pipeline v0.13.1-0.20200612190354-f291efc24236
+	github.com/tektoncd/plumbing/pipelinerun-logs v0.0.0-20191206114338-712d544c2c21 // indirect
 	go.uber.org/zap v1.15.0
 	gocloud.dev v0.19.0
-	golang.org/x/crypto v0.0.0-20200206161412-a0c6ece9d31a
+	golang.org/x/crypto v0.0.0-20200323165209-0ec3e9974c59
+	golang.org/x/lint v0.0.0-20200130185559-910be7a94367 // indirect
+	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
+	google.golang.org/appengine v1.6.5 // indirect
 	google.golang.org/grpc v1.29.1 // indirect
-	google.golang.org/protobuf v1.21.0 // indirect
 	k8s.io/api v0.18.2 // indirect
 	k8s.io/apimachinery v0.18.2
 	k8s.io/client-go v11.0.1-0.20190805182717-6502b5e7b1b5+incompatible
-	knative.dev/pkg v0.0.0-20200509234445-b52862b1b3ea
+	k8s.io/gengo v0.0.0-20191108084044-e500ee069b5c // indirect
+	knative.dev/caching v0.0.0-20200521155757-e78d17bc250e // indirect
+	knative.dev/pkg v0.0.0-20200528142800-1c6815d7e4c9
 )
 
 // Knative deps (release-0.13)

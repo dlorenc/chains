@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/dlorenc/chains/pkg/payload"
 	"github.com/tektoncd/pipeline/pkg/version"
 
 	// "strings"
@@ -25,7 +26,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func AttachSignature(s v1beta1.TaskResource, signer *Signer, tr *pipelinev1beta1.TaskRun, l *zap.SugaredLogger) error {
+func AttachImageSignature(s v1beta1.TaskResource, signer *Signer, tr *pipelinev1beta1.TaskRun, l *zap.SugaredLogger) error {
 	creds, err := k8schain.NewInCluster(k8schain.Options{
 		Namespace:          "tekton-pipelines",
 		ServiceAccountName: "tekton-pipelines-controller",
@@ -42,6 +43,8 @@ func AttachSignature(s v1beta1.TaskResource, signer *Signer, tr *pipelinev1beta1
 	}
 	l.Info("rrs: %v", rrs)
 
+	p := payload.CreatePayload(tr)
+
 	sig := SimpleSigning{
 		Critical: Critical{
 			Identity: Identity{
@@ -55,6 +58,7 @@ func AttachSignature(s v1beta1.TaskResource, signer *Signer, tr *pipelinev1beta1
 		Optional: map[string]interface{}{
 			"builder":    fmt.Sprintf("Tekton %s", version.PipelineVersion),
 			"provenance": tr.Status,
+			"in_toto":    p,
 		},
 	}
 

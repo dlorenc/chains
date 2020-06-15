@@ -140,7 +140,7 @@ func (r *rec) Reconcile(ctx context.Context, key string) error {
 						switch or.Type {
 						case "image":
 							r.logger.Infof("Found image resource to sign %s", or.Name)
-							if err := sign.AttachSignature(or, r.signer, tr, r.logger); err != nil {
+							if err := sign.AttachImageSignature(or, r.signer, tr, r.logger); err != nil {
 								r.logger.Warnf("Error attaching signature: %s", err)
 							}
 						case "storage":
