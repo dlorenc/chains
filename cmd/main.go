@@ -20,13 +20,16 @@ import (
 
 	"github.com/dlorenc/chains/pkg/sign"
 	"github.com/tektoncd/pipeline/pkg/apis/pipeline"
+	versioned "github.com/tektoncd/pipeline/pkg/client/clientset/versioned"
 	pipelineclient "github.com/tektoncd/pipeline/pkg/client/injection/client"
 	taskruninformer "github.com/tektoncd/pipeline/pkg/client/injection/informers/pipeline/v1beta1/taskrun"
 	listers "github.com/tektoncd/pipeline/pkg/client/listers/pipeline/v1beta1"
 	"go.uber.org/zap"
 	"k8s.io/apimachinery/pkg/api/errors"
+	kubernetes "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
 	"knative.dev/pkg/apis"
+	kubeclient "knative.dev/pkg/client/injection/kube/client"
 	"knative.dev/pkg/configmap"
 	"knative.dev/pkg/controller"
 	"knative.dev/pkg/injection"
@@ -52,10 +55,15 @@ func main() {
 			if err != nil {
 				logger.Fatal(err)
 			}
+			kubeclientset := kubeclient.Get(ctx)
+			pipelineclientset := pipelineclient.Get(ctx)
+
 			c := &rec{
-				logger:        logger,
-				taskRunLister: taskRunInformer.Lister(),
-				signer:        signer,
+				kubeclientset:     kubeclientset,
+				pipelineclientset: pipelineclientset,
+				logger:            logger,
+				taskRunLister:     taskRunInformer.Lister(),
+				signer:            signer,
 			}
 			impl := controller.NewImpl(c, c.logger, pipeline.TaskRunControllerName)
 
@@ -70,14 +78,15 @@ func main() {
 }
 
 type rec struct {
-	logger        *zap.SugaredLogger
-	taskRunLister listers.TaskRunLister
-	tracker       tracker.Interface
-	signer        *sign.Signer
+	kubeclientset     kubernetes.Interface
+	pipelineclientset versioned.Interface
+	logger            *zap.SugaredLogger
+	taskRunLister     listers.TaskRunLister
+	tracker           tracker.Interface
+	signer            *sign.Signer
 }
 
 func (r *rec) Reconcile(ctx context.Context, key string) error {
-	pipelineclientset := pipelineclient.Get(ctx)
 	r.logger.Infof("reconciling resource key: %s", key)
 
 	namespace, name, err := cache.SplitMetaNamespaceKey(key)
@@ -112,7 +121,7 @@ func (r *rec) Reconcile(ctx context.Context, key string) error {
 			}
 			tr.Annotations["signed"] = string(sig)
 			tr.Annotations["body"] = base64.StdEncoding.EncodeToString(body)
-			if _, err := pipelineclientset.TektonV1beta1().TaskRuns(tr.Namespace).Update(tr); err != nil {
+			if _, err := r.pipelineclientset.TektonV1beta1().TaskRuns(tr.Namespace).Update(tr); err != nil {
 				r.logger.Warnf("Error attaching signature to %s/%s: %w", namespace, name, err)
 			}
 
