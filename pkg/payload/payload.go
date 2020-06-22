@@ -5,7 +5,6 @@ import (
 	"github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 )
 
-
 // CreatePayload creates the in_toto link file we attach.
 func CreatePayload(tr *v1beta1.TaskRun) in_toto.Link {
 	l := in_toto.Link{
@@ -15,7 +14,7 @@ func CreatePayload(tr *v1beta1.TaskRun) in_toto.Link {
 	l.Materials = map[string]interface{}{}
 	for _, r := range tr.Spec.Resources.Inputs {
 		for _, rr := range tr.Status.ResourcesResult {
-			if r.Name == rr. {
+			if r.Name == rr.ResourceName {
 				l.Materials[rr.ResourceName] = rr
 			}
 		}

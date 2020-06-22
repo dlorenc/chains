@@ -23,12 +23,10 @@ import (
 	pipelineclient "github.com/tektoncd/pipeline/pkg/client/injection/client"
 	taskruninformer "github.com/tektoncd/pipeline/pkg/client/injection/informers/pipeline/v1beta1/taskrun"
 	listers "github.com/tektoncd/pipeline/pkg/client/listers/pipeline/v1beta1"
-	"github.com/tektoncd/pipeline/pkg/reconciler"
 	"go.uber.org/zap"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/client-go/tools/cache"
 	"knative.dev/pkg/apis"
-	kubeclient "knative.dev/pkg/client/injection/kube/client"
 	"knative.dev/pkg/configmap"
 	"knative.dev/pkg/controller"
 	"knative.dev/pkg/injection"
@@ -50,21 +48,11 @@ func main() {
 			logger := logging.FromContext(ctx)
 			taskRunInformer := taskruninformer.Get(ctx)
 
-			kubeclientset := kubeclient.Get(ctx)
-			pipelineclientset := pipelineclient.Get(ctx)
-
-			opt := reconciler.Options{
-				KubeClientSet:     kubeclientset,
-				PipelineClientSet: pipelineclientset,
-				ConfigMapWatcher:  cmw,
-				Logger:            logger,
-			}
 			signer, err := sign.NewSigner()
 			if err != nil {
 				logger.Fatal(err)
 			}
 			c := &rec{
-				Base:          reconciler.NewBase(opt, "watcher", pipeline.Images{}),
 				logger:        logger,
 				taskRunLister: taskRunInformer.Lister(),
 				signer:        signer,
@@ -82,7 +70,6 @@ func main() {
 }
 
 type rec struct {
-	*reconciler.Base
 	logger        *zap.SugaredLogger
 	taskRunLister listers.TaskRunLister
 	tracker       tracker.Interface
@@ -90,6 +77,7 @@ type rec struct {
 }
 
 func (r *rec) Reconcile(ctx context.Context, key string) error {
+	pipelineclientset := pipelineclient.Get(ctx)
 	r.logger.Infof("reconciling resource key: %s", key)
 
 	namespace, name, err := cache.SplitMetaNamespaceKey(key)
@@ -124,7 +112,7 @@ func (r *rec) Reconcile(ctx context.Context, key string) error {
 			}
 			tr.Annotations["signed"] = string(sig)
 			tr.Annotations["body"] = base64.StdEncoding.EncodeToString(body)
-			if _, err := r.PipelineClientSet.TektonV1beta1().TaskRuns(tr.Namespace).Update(tr); err != nil {
+			if _, err := pipelineclientset.TektonV1beta1().TaskRuns(tr.Namespace).Update(tr); err != nil {
 				r.logger.Warnf("Error attaching signature to %s/%s: %w", namespace, name, err)
 			}
 
